@@ -2,6 +2,16 @@
   "name": "html-nodes-in-area",
   "version": "1.0.0",
   "main": "index.js",
-  "author": "daiiz <da.iz.mg@gmail.com>",
-  "license": "MIT"
+  "author": "Daiki Iizuka <da.iz.mg@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "babel src/ --out-dir dist/"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "babel-cli": "^6.14.0",
+    "babel-polyfill": "^6.13.0",
+    "babel-preset-es2015": "^6.14.0",
+    "babel-register": "^6.14.0"
+  }
 }
