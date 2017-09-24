@@ -6,6 +6,12 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _jquery = require('jquery');
+
+var _jquery2 = _interopRequireDefault(_jquery);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var HTMLNodesInArea = function () {
@@ -133,7 +139,7 @@ var HTMLNodesInArea = function () {
           var point = _step.value;
 
           var elem = document.elementFromPoint(point[0] - window.pageXOffset, point[1] - window.pageYOffset);
-          if (elem === node.self || $(elem).find(node.self).length > 0 || $(node.self).find(elem).length > 0) return true;
+          if (elem === node.self || (0, _jquery2.default)(elem).find(node.self).length > 0 || (0, _jquery2.default)(node.self).find(elem).length > 0) return true;
         }
       } catch (err) {
         _didIteratorError = true;
