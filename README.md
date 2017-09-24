@@ -1,3 +1,3 @@
 # html-nodes-in-area
 
-Extract HTML nodes in the specific area.
+Extract specific HTML nodes in the area.
