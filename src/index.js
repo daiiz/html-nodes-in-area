@@ -39,9 +39,7 @@ export default class HTMLNodesInArea {
         var classList = elem.classList
         if (classList) {
           classList.forEach(cn => {
-            if (this.options.excludeTagClassNames.indexOf(cn) !== -1) {
-              isExclude = true
-            }
+            if (this.options.excludeTagClassNames.indexOf(cn) !== -1) isExclude = true
           })
         }
         if (!isExclude) res.push(elem)
@@ -53,8 +51,7 @@ export default class HTMLNodesInArea {
   _dfs (node, mark, dep) {
     mark = '' + mark
 
-    if (node.nodeType === this.tagName ||
-      node.nodeName.toLowerCase() === this.tagName) {
+    if (node.nodeType === this.tagName || node.nodeName.toLowerCase() === this.tagName) {
       this._register(node)
     }
 

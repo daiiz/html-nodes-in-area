@@ -62,9 +62,7 @@ var HTMLNodesInArea = function () {
           var classList = elem.classList;
           if (classList) {
             classList.forEach(function (cn) {
-              if (_this.options.excludeTagClassNames.indexOf(cn) !== -1) {
-                isExclude = true;
-              }
+              if (_this.options.excludeTagClassNames.indexOf(cn) !== -1) isExclude = true;
             });
           }
           if (!isExclude) res.push(elem);
