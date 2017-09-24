@@ -2,28 +2,29 @@ export default class HTMLNodesInArea {
   constructor (targetNode) {
     this.targetNode = targetNode
     this.TEXT = 3
-    this.mark = Math.floor(Math.random() * 100000)
+    this.mark = Math.floor(Math.random() * 10000)
     this.range = null
     this.nodes = []
     this.result = []
     this.tagName = this.TEXT
-
-    // Settings
-    this.maxDepth = 20
-    this.excludeTagNames = [
-      'meta', 'script', 'style', 'iframe', 'audio', 'video'
-    ]
-    this.excludeTagIds = []
-    this.excludeTagClassNames = []
-    this.excludeInvisibles = true
-    this.minStrLength = 1
     this.detail = false
+
+    // Options
+    this.options = {
+      maxDepth: 20,
+      excludeTagIds: [],
+      excludeTagClassNames: [],
+      excludeTagNames: [
+        'meta', 'script', 'style', 'iframe', 'audio', 'video'
+      ],
+      excludeInvisibles: true,
+      minStrLength: 1,
+      onlyInTopLayer: true
+    }
   }
 
-  config (options={}) {
-    for (let key in options) {
-      this[key] = options[key]
-    }
+  setOptions (options={}) {
+    for (let key in options) this.options[key] = options[key]
   }
 
   _filterElems (elems) {
@@ -31,12 +32,12 @@ export default class HTMLNodesInArea {
     for (var i = 0; i < elems.length; i++) {
       var elem = elems[i]
       var isExclude = false
-      if (this.excludeTagNames.indexOf(elem.nodeName.toLowerCase()) === -1) {
-        if (this.excludeTagIds.indexOf(elem.id) !== -1) isExclude = true
+      if (this.options.excludeTagNames.indexOf(elem.nodeName.toLowerCase()) === -1) {
+        if (this.options.excludeTagIds.indexOf(elem.id) !== -1) isExclude = true
         var classList = elem.classList
         if (classList) {
           classList.forEach(cn => {
-            if (this.excludeTagClassNames.indexOf(cn) !== -1) {
+            if (this.options.excludeTagClassNames.indexOf(cn) !== -1) {
               isExclude = true
             }
           })
@@ -56,14 +57,13 @@ export default class HTMLNodesInArea {
     }
 
     if (node.nodeType === 3) return
-    if (dep > this.maxDepth) return
+    if (dep > this.options.maxDepth) return
     node.dataset.daiiz_visit = mark
 
     var childNodes = this._filterElems(node.childNodes)
     for (var j = 0; j < childNodes.length; j++) {
       var child = childNodes[j]
-      if ((child.nodeType === 3) ||
-        (child.dataset && child.dataset.daiiz_visit !== mark)) {
+      if ((child.nodeType === 3) || (child.dataset && child.dataset.daiiz_visit !== mark)) {
         // 未訪問
         this._dfs(child, mark, dep + 1)
       }
@@ -72,7 +72,7 @@ export default class HTMLNodesInArea {
 
   _register (node) {
     if (this.tagName === this.TEXT) {
-      if (node.nodeValue.trim().length >= this.minStrLength) {
+      if (node.nodeValue.trim().length >= this.options.minStrLength) {
         // textNodeに対してgetBoundingClientRectを実行できないのでspanでwrapする
         var p = node.parentNode
         if (p.className !== 'lemonpie_text_span') {
@@ -101,9 +101,24 @@ export default class HTMLNodesInArea {
     return false
   }
 
+  _isTheTopLayer (node) {
+    const points = [
+      [node.position.left + 1, node.position.top + 1],
+      [node.position.right - 1, node.position.top + 1],
+      [node.position.right - 1, node.position.bottom - 1],
+      [node.position.left + 1, node.position.bottom - 1]
+    ]
+    for (let point of points) {
+      const elem = document.elementFromPoint(
+        point[0] - window.pageXOffset, point[1] - window.pageYOffset)
+      if (elem === node.self || $(elem).find(node.self).length > 0 ||
+        $(node.self).find(elem).length > 0) return true
+    }
+    return false
+  }
+
   extract (range = null, tagName = this.TEXT) {
-    if (range &&
-      range.top !== undefined && range.left !== undefined) this.range = range
+    if (range && range.top !== undefined && range.left !== undefined) this.range = range
     if (tagName && typeof (tagName) === 'string') {
       this.tagName = tagName.toLowerCase()
       this.detail = true
@@ -115,7 +130,7 @@ export default class HTMLNodesInArea {
     for (var i = 0; i < this.nodes.length; i++) {
       var textSpan = this.nodes[i]
       var rect = textSpan.getBoundingClientRect()
-      if (this.excludeInvisibles && rect.top === 0 && rect.bottom === 0 &&
+      if (this.options.excludeInvisibles && rect.top === 0 && rect.bottom === 0 &&
         rect.left === 0 && rect.right === 0) {
         continue
       }
@@ -132,9 +147,12 @@ export default class HTMLNodesInArea {
         res.self = textSpan
         res.parent = textSpan.parentNode
       }
-      if (this._isInvolvedIn(res.position)) {
-        this.result.push(res)
-      }
+      
+      // 範囲内に存在しないものを無視
+      if (!this._isInvolvedIn(res.position)) continue
+      // 最上層に存在しないものを無視
+      if (this.options.onlyInTopLayer && !this._isTheTopLayer(res)) continue
+      this.result.push(res)
     }
     return this.result
   }
